@@ -4,7 +4,7 @@ class RmrkGraphQlClient {
   factory RmrkGraphQlClient() => _singleton;
 
   RmrkGraphQlClient._internal() {
-    final httpLink = HttpLink("edge-proxy.gql-rmrk.workers.dev/graphql");
+    final httpLink = HttpLink("https://edge-proxy.gql-rmrk.workers.dev/graphql");
     _client = GraphQLClient(
         link: httpLink, cache: GraphQLCache(store: InMemoryStore()));
   }

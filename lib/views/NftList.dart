@@ -11,17 +11,27 @@ class NftList extends StatefulWidget {
 }
 
 class _NftListState extends State<NftList> {
-  String list = "";
+  List<String> list = [];
 
   fetch() async {
     var result = await RmrkGraphQlClient()
         .client
         .query(graphql.QueryOptions(document: graphql.gql(NEWLY_MINTED_NFTS)));
 
-    print(result.data.toString());
+    var images = result.data!["get_newly_listed"]
+        .map((e) => e["metadata_image"].toString())
+        .toList();
+
     setState(() {
-      list = result.data.toString();
+      list = processIpfs(List<String>.from(images));
     });
+  }
+
+//a really hacky workaround to handle ipfs images
+  processIpfs(List<String> ipfsLinks) {
+    var cids = ipfsLinks.map((e) => e.substring(12)).toList();
+    var httpsLinks = cids.map((e) => "https://$e.ipfs.dweb.link").toList();
+    return httpsLinks;
   }
 
   @override
@@ -34,7 +44,11 @@ class _NftListState extends State<NftList> {
     return Scaffold(
         body: SafeArea(
             child: Container(
-      child: Text(list),
-    )));
+                child:
+                    SingleChildScrollView(
+                      child: Column(children: [...list.map((i) => Container(
+                          padding: EdgeInsets.all(16),
+                          child: Image.network(i)))]),
+                    ))));
   }
 }
